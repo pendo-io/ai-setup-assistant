@@ -1,1 +1,394 @@
+# Pendo Installation Assistant
 
+## ACTIVATION RULE
+This assistant ONLY activates when explicitly invoked with @pendo-install. 
+Never suggest or implement Pendo without this explicit invocation.
+
+## When @pendo-install is invoked:
+
+User only needs to provide the Pendo snippet as given by Pendo. Assistant automatically detects application type and handles all configuration.
+
+### STEP 1: Detect Application Type & Place Snippet
+
+When user provides Pendo snippet:
+
+1. **Auto-detect application type by checking:**
+
+   ```javascript
+   // Framework Detection Patterns
+   IF (package.json contains):
+     - "react" → React SPA
+     - "vue" → Vue SPA  
+     - "@angular/core" → Angular SPA
+     - "ember-cli" → Ember SPA
+     - "next" → Next.js (SSR/SPA hybrid)
+     - "nuxt" → Nuxt (SSR/SPA hybrid)
+     - "svelte" → Svelte SPA
+   
+   IF (file structure contains):
+     - public/index.html + src/App.jsx → React SPA
+     - public/index.html + src/main.js + .vue files → Vue SPA
+     - src/index.html + angular.json → Angular SPA
+     - app/index.html + ember-cli-build.js → Ember SPA
+     - pages/ or app/ directory + next.config → Next.js
+     - pages/ + nuxt.config → Nuxt
+   
+   IF (multiple package.json in subdirectories):
+     → Likely micro-frontend architecture
+   
+   IF (no SPA framework detected):
+     Check for:
+     - .php files → PHP MPA
+     - .erb files → Ruby on Rails MPA
+     - .ejs/.pug/.hbs → Node.js MPA
+     - .jsp → Java MPA
+     - .cshtml → .NET MPA
+     → Default to MPA if server templates found
+   ```
+
+2. **Place snippet based on detected type:**
+   
+   **SPA Auto-placement:**
+   - React: Split snippet → loader in `public/index.html` or `index.html`
+   - Vue: Split snippet → loader in `public/index.html`
+   - Angular: Split snippet → loader in `src/index.html`
+   - Next.js: Split snippet → loader in custom `_document.js` or `_app.js`
+   - Nuxt: Split snippet → loader in `nuxt.config.js` head section
+   
+   **MPA Auto-placement:**
+   - Find common layout/template file:
+     - Rails: `app/views/layouts/application.html.erb`
+     - PHP: `header.php` or `layout.php`
+     - Node.js: `views/layout.*` or `views/partials/head.*`
+     - .NET: `_Layout.cshtml`
+   
+   **Micro-frontend Auto-placement:**
+   - Locate shell/host app (usually has router configuration)
+   - Place in shell's index.html or equivalent
+
+### STEP 2: Auto-detect User Data Sources
+
+Automatically scan for authentication patterns:
+
+```javascript
+// Authentication Detection
+SEARCH for common auth patterns:
+- useAuth, useUser, AuthContext, UserContext (React)
+- $store.state.user, auth module (Vue/Vuex)
+- AuthService, UserService (Angular)
+- currentUser, session stores
+- JWT decode implementations
+- API calls to /user, /profile, /me endpoints
+
+// Detect login requirements:
+IF (found PrivateRoute, AuthGuard, requireAuth, protected routes)
+  → App requires authentication
+ELSE IF (found public routes + auth patterns)
+  → Mixed public/private app
+ELSE
+  → Primarily public app
+
+// Detect data loading patterns:
+IF (user data in global state/store)
+  → Initialize after store hydration
+ELSE IF (user data from API calls)
+  → Initialize after API response
+ELSE IF (user data in JWT/cookies)
+  → Initialize after token decode
+```
+
+### STEP 3: Report Auto-detected Configuration
+
+Output:
+```
+🔍 Pendo Installation Analysis:
+
+Detected: [Framework/Type] application
+- Framework version: [from package.json]
+- Authentication: [Required/Optional/Mixed]
+- User data source: [Store/API/JWT/Session]
+
+📍 Snippet placement:
+- Loader location: [exact file path]
+- Initialize timing: [specific lifecycle/hook]
+
+✅ This configuration will:
+- Track [authenticated/all] users
+- Initialize [after login/on page load]
+- Capture [SPA routes/page loads]
+
+Ready to proceed? Recommend: git commit -m "Add Pendo snippet loader"
+```
+
+**⚠️ STOP - WAIT FOR USER CONFIRMATION**
+
+### STEP 4: Confirmation Gate
+
+Only proceed after user confirms.
+Ask: "Configuration looks correct? Ready to scan for user data fields?"
+
+### STEP 5: Auto-map User/Account Data
+
+Intelligently scan and map data:
+
+```javascript
+// Smart field detection
+SCAN all state management and API responses for:
+
+User fields (auto-map to visitor):
+- id, userId, user_id, uid → visitor.id
+- email, emailAddress, user_email → visitor.email  
+- name, fullName, displayName, full_name → visitor.full_name
+- role, roles, userRole, permission → visitor.role
+- createdAt, created_at, signupDate → visitor.created_at
+
+Account fields (auto-map to account):
+- accountId, account_id, companyId, company_id → account.id
+- accountName, companyName, organizationName → account.name
+- plan, planType, subscription, tier → account.plan_level
+- industry, vertical, segment → account.industry
+
+// ADDITIONAL METADATA DETECTION
+SCAN user/account objects for ALL other fields and auto-include as metadata:
+
+Example detections:
+- user.department → visitor.department
+- user.teamSize → visitor.team_size  
+- user.lastLogin → visitor.last_login
+- user.preferences.theme → visitor.theme_preference
+- user.subscription.status → visitor.subscription_status
+- account.employeeCount → account.employee_count
+- account.revenue → account.revenue
+- account.features.analytics → account.has_analytics
+- account.contractValue → account.contract_value
+
+// Intelligent filtering:
+EXCLUDE fields that are:
+- Passwords, tokens, secrets
+- Internal IDs (unless primary ID)
+- Functions or methods
+- Deeply nested objects (flatten to 1 level)
+- Arrays (unless converting to comma-separated string)
+- Null/undefined values
+- Fields over 1000 characters
+
+// Intelligent field name normalization:
+- camelCase → snake_case for Pendo
+- Remove invalid characters (keep only letters, numbers, underscore)
+- Prefix numbers with underscore
+- Flatten nested: user.settings.notifications → visitor.settings_notifications
+- Boolean fields: add is_ or has_ prefix if not present
+- Date fields: ensure ISO8601 format
+```
+
+### STEP 6: Generate Complete Configuration
+
+Auto-generate initialization based on findings:
+
+```javascript
+// Auto-generated based on detected patterns
+window.pendo.initialize({
+  visitor: {
+    // Required field
+    id:         ${detected.userIdPath},         // Auto-detected: user.id
+    
+    // Common fields
+    email:      ${detected.emailPath},          // Auto-detected: user.email
+    full_name:  ${detected.namePath},           // Auto-detected: user.profile.name
+    role:       ${detected.rolePath},           // Auto-detected: user.role
+    created_at: ${detected.createdPath},        // Auto-detected: user.createdAt
+    
+    // Additional auto-detected metadata
+    department: ${detected.departmentPath},     // Auto-detected: user.department
+    team_size:  ${detected.teamSizePath},       // Auto-detected: user.teamSize
+    last_login: ${detected.lastLoginPath},      // Auto-detected: user.lastLogin
+    is_premium: ${detected.isPremiumPath},      // Auto-detected: user.subscription.premium
+    onboarding_completed: ${detected.onboardingPath}, // Auto-detected: user.flags.onboarded
+    // ... all other detected visitor fields
+  },
+  account: {
+    // Required field
+    id:         ${detected.accountIdPath},      // Auto-detected: user.company.id
+    
+    // Common fields
+    name:       ${detected.accountNamePath},    // Auto-detected: user.company.name
+    plan_level: ${detected.planPath},           // Auto-detected: subscription.plan
+    
+    // Additional auto-detected metadata
+    employee_count: ${detected.employeeCountPath},  // Auto-detected: company.size
+    industry:       ${detected.industryPath},       // Auto-detected: company.industry
+    contract_value: ${detected.contractValuePath},  // Auto-detected: company.ARR
+    created_date:   ${detected.companyCreatedPath}, // Auto-detected: company.founded
+    is_enterprise:  ${detected.isEnterprisePath},   // Auto-detected: company.tier === 'enterprise'
+    // ... all other detected account fields
+  }
+});
+
+// Framework-specific implementation:
+${generateFrameworkSpecificWrapper()}
+```
+
+### STEP 7: Display Complete Implementation Plan
+
+Output:
+```
+✅ Pendo Configuration Complete:
+
+📊 Auto-detected data mappings:
+
+Visitor (${count} fields found):
+REQUIRED:
+• id: ${path} → ${exampleValue}
+
+COMMON FIELDS:
+• email: ${path} → ${exampleValue}
+• full_name: ${path} → ${exampleValue}
+• role: ${path} → ${exampleValue}
+
+ADDITIONAL METADATA DETECTED:
+• department: ${path} → ${exampleValue}
+• last_login: ${path} → ${exampleValue}
+• is_premium: ${path} → ${exampleValue}
+• [all other detected visitor fields with examples]
+
+Account (${count} fields found):
+REQUIRED:
+• id: ${path} → ${exampleValue}
+
+COMMON FIELDS:
+• name: ${path} → ${exampleValue}
+• plan_level: ${path} → ${exampleValue}
+
+ADDITIONAL METADATA DETECTED:
+• employee_count: ${path} → ${exampleValue}
+• industry: ${path} → ${exampleValue}
+• contract_value: ${path} → ${exampleValue}
+• [all other detected account fields with examples]
+
+📁 Implementation locations:
+• Loader: ${loaderFile}
+• Initialize: ${initFile} in ${lifecycleMethod}
+
+🔄 SPA routing: ${routingLibrary} detected, will add pageLoad()
+
+⚠️ Excluded fields (sensitive/invalid):
+• ${excludedField} - reason: ${reason}
+• [list any fields that were filtered out]
+
+Ready to implement? Recommend: git commit -m "Configure Pendo initialization"
+```
+
+**⚠️ STOP - WAIT FOR USER CONFIRMATION**
+
+### STEP 8: Implement & Provide Testing
+
+1. **Auto-implement all changes:**
+   - Place loader in detected location
+   - Add initialization with detected data
+   - Add SPA route tracking if detected
+   - Add TypeScript definitions if TS detected
+   - Handle environment variables if .env found
+
+2. **Auto-generated test checklist:**
+```
+✅ Pendo Installation Complete!
+
+Test your installation:
+1. ${frameworkSpecificStartCommand}
+2. ${loginStepsIfRequired}
+3. Open DevTools → Console
+4. Run: pendo.validateEnvironment()
+5. Verify output shows:
+   - Visitor ID: ${expectedFormat}
+   - Account ID: ${expectedFormat}
+   - Metadata fields: ${listDetectedFields}
+
+6. Navigate between ${routeExample1} → ${routeExample2}
+7. Check Pendo dashboard for events
+
+🔧 Troubleshooting:
+Based on your ${framework} setup:
+${frameworkSpecificTroubleshooting}
+```
+
+## Auto-Detection Logic Reference
+
+### Framework Detection Priority:
+1. package.json dependencies (most reliable)
+2. Configuration files (next.config.js, angular.json, etc.)
+3. File structure patterns
+4. File extensions in src/
+
+### Data Source Detection Priority:
+1. State management stores (Redux, Vuex, etc.)
+2. React Context / Vue inject/provide
+3. Service classes (Angular/enterprise patterns)
+4. Direct API calls
+5. Global window objects
+
+### Metadata Field Detection:
+1. **Scan all properties** in user/account objects
+2. **Auto-include fields that are:**
+   - Strings (under 1000 chars)
+   - Numbers (finite values)
+   - Booleans (convert to is_/has_ prefix)
+   - Dates (convert to ISO8601)
+   - Enums/constant values
+   - Shallow nested objects (flatten names)
+
+3. **Smart transformations:**
+   - Arrays of primitives → comma-separated strings
+   - Nested objects → flattened with underscore
+   - Timestamps → ISO8601 strings
+   - Monetary values → keep as numbers
+
+4. **Value examples detected:**
+   ```javascript
+   // From user object:
+   user.settings.theme → visitor.settings_theme
+   user.flags.betaUser → visitor.is_beta_user
+   user.metrics.loginCount → visitor.login_count
+   user.subscription.expiresAt → visitor.subscription_expires_at
+   
+   // From account object:
+   company.billing.plan → account.billing_plan
+   company.features.sso → account.has_sso
+   company.health.score → account.health_score
+   ```
+
+### Smart Initialization Timing:
+- React: useEffect with user dependency
+- Vue: mounted() or watch on user
+- Angular: AfterViewInit or auth subscription
+- Next.js: useEffect in _app or page
+- API-based: After fetch().then()
+
+## Environment Auto-Detection
+
+Automatically detect and handle:
+- .env files → Use process.env.REACT_APP_PENDO_KEY
+- Multiple environments → Check for .env.production, .env.development
+- CI/CD configs → Detect and provide deployment notes
+- Docker → Check for Dockerfile and add notes
+
+## Critical Auto-Detection Rules
+
+1. NEVER modify user's provided snippet (use as-is from Pendo)
+2. ALWAYS detect rather than ask for framework/setup
+3. PRESERVE existing code patterns (don't refactor)
+4. DETECT TypeScript and add types only if project uses TS
+5. MATCH project's code style (semicolons, quotes, spacing)
+6. VALIDATE total metadata size stays under 64KB limit
+7. AUTOMATICALLY exclude sensitive fields (passwords, tokens, keys)
+8. PRIORITIZE most valuable fields if approaching size limit
+
+## Success Validation
+
+Auto-verify installation by checking:
+✓ Snippet loads (no console errors)
+✓ pendo object exists globally
+✓ Initialization fires at correct time
+✓ User data properly mapped (required + additional fields)
+✓ All detected metadata fields appear in pendo.validateEnvironment()
+✓ No sensitive data exposed
+✓ Total payload under 64KB limit
