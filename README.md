@@ -6,7 +6,7 @@ The Pendo Installation Assistant is a smart tool designed to streamline the inte
 
 ### How to Use
 
-1.  **Invoke the Assistant:** In a new prompt, type `@pendo-install`.
+1.  **Utilize the Prompt:** Copy the provided prompt to your selected AI tool. 
 2.  **Provide Your Snippet:** Paste the Pendo snippet you obtained from your Pendo account.
 3.  **Review the Plan:** The assistant will analyze your codebase and propose a complete implementation plan, including snippet placement, initialization logic, and user/account data mapping.
 4.  **Confirm and Implement:** Review the proposed changes, confirm they look correct, and the assistant will apply the changes directly to your project.
