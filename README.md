@@ -32,3 +32,7 @@ The assistant is designed to be safe and non-intrusive:
 * It provides a confirmation step before any changes are made to your code.
 
 For more details on the assistant's logic and capabilities, please refer to the detailed prompt document.
+
+---
+
+This AI prompt is provided to help streamline installation of the Pendo snippet. Please be aware you are solely responsible for reviewing, testing, and deciding whether to deploy any resulting code. Be sure to ensure installation complies with your development, security, privacy, and compliance requirements as Pendo will only process data as instructed by you under your Agreement and DPA. This snippet is provided “as is,” without warranties, and Pendo is not liable for modifications to your codebase or their effects. If you use third-party tools to run the prompt, they are independent services governed by their own terms and Pendo does not control or guarantee their performance.
