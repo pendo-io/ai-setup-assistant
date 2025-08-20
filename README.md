@@ -40,13 +40,9 @@ After reviewing and deploying, you can use Pendo's built-in developer tools to c
 
 * Run a check: Open your browser's developer console and run pendo.validateEnvironment().
 * Verify the output: Look for the following in the console output pendo.enableDebugging():
-* ** The visitor.id and account.id are present and correctly formatted.
-* ** All of the metadata fields you intended to map are listed with their correct values.
+  * The visitor.id and account.id are present and correctly formatted.
+  * All of the metadata fields you intended to map are listed with their correct values.
 * Check the UI: Within a few minutes, you should see data from your test environment appear in your Pendo subscription's Raw Events tab under Settings > Subscription Settings > Applications.
-
-
-
-
 
 ---
 
