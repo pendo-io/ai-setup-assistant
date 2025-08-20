@@ -34,5 +34,20 @@ The assistant is designed to be safe and non-intrusive:
 For more details on the assistant's logic and capabilities, please refer to the detailed prompt document.
 
 ---
+### How to Review
+
+After reviewing and deploying, you can use Pendo's built-in developer tools to confirm everything is working as expected.
+
+* Run a check: Open your browser's developer console and run pendo.validateEnvironment().
+* Verify the output: Look for the following in the console output pendo.enableDebugging():
+** The visitor.id and account.id are present and correctly formatted.
+** All of the metadata fields you intended to map are listed with their correct values.
+* Check the UI: Within a few minutes, you should see data from your test environment appear in your Pendo subscription's Raw Events tab under Settings > Subscription Settings > Applications.
+
+
+
+
+
+---
 
 This AI prompt is provided to help streamline installation of the Pendo snippet. Please be aware you are solely responsible for reviewing, testing, and deciding whether to deploy any resulting code. Be sure to ensure installation complies with your development, security, privacy, and compliance requirements as Pendo will only process data as instructed by you under your Agreement and DPA. This snippet is provided “as is,” without warranties, and Pendo is not liable for modifications to your codebase or their effects. If you use third-party tools to run the prompt, they are independent services governed by their own terms and Pendo does not control or guarantee their performance.
